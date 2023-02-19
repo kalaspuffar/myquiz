@@ -65,7 +65,7 @@
                     
                     main.style.display = '';
                     name_input.style.display = 'none';
-                    
+
                     if (res.message.op === 'game_end') {                        
                         gameover(main);
                         quit();
@@ -130,9 +130,9 @@
             }
             
             function quit() {
-                if (socket != null) {
-                    socket.close();
-                    socket = null;
+                if (websocket != null) {
+                    websocket.close();
+                    websocket = null;
                 }
             }
 

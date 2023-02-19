@@ -24,6 +24,8 @@
     <body>
         <div class="section hero">
             <div class="container">
+                <div class="row" id="userlist">
+                </div>
                 <div class="row">
                     <div id="log" class="one-half column" style="background-color: white; border-radius:100px; color: black; padding: 10px"></div>
                     <div class="one-half column">
@@ -66,9 +68,10 @@
                 {name: 'Horney', img: 'stego.svg'},
                 {name: 'Tigrrrrr', img: 'tiger.svg'},
                 {name: 'Shelly', img: 'turtle.svg'},
-                {name: 'Sharpy', img: 'walross.svg'},
+                {name: 'Sharpy', img: 'walross.svg'}
             ]
 
+            var players = [];
 
             var websocket;
             try {
@@ -87,15 +90,21 @@
                 websocket.onmessage = function(msg) {                     
                     var res = JSON.parse(msg.data);
                     if (res.message.op === 'name') {
-                        log("Name: " + JSON.stringify(res));
-                        reset();
+                        players[res.user_id].name = res.message.answer.name;
+                        players[res.user_id].img = res.message.answer.img;
+                        reset(res.user_id);
+                        updateUserList();
                     } else if (res.message.op === 'answer') {
                         log("Answer: " + JSON.stringify(res));
-                        reset();
+                        reset(res.user_id);
                     } else if (res.message.op === 'join_game') {
-                        log("Answer: " + JSON.stringify(res));
+                        players[res.user_id] = {
+                            user_id: res.user_id
+                        };
+                        updateUserList();
+                        sendNewCharToPlayer(res.user_id);
                     } else if (res.message.op === 'disconnect') {
-                        log("Answer: " + JSON.stringify(res));                        
+                        delete players[res.user_id];
                     } else {
                         log("Received: " + res.message);
                     }
@@ -106,8 +115,33 @@
             } catch(ex){ 
                 log(ex); 
             }
-            $("msg").focus();
 
+            function userImageUsed(img) {
+                for (const player_id in players) {
+                    if (players[player_id].img == img) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            function updateUserList() {
+                var userlist = document.getElementById('userlist');
+                var table = '<TABLE>';
+
+                table += '<TR><TH>id</TH><TH>name</TH><TH>img</TH></TR>';
+
+                for (const i in players) {
+                    table += '<TR>';
+                    table += '<TD>' + players[i].user_id + '</TD>';
+                    table += '<TD>' + players[i].name + '</TD>';
+                    table += '<TD>' + players[i].img + '</TD>';
+                    table += '</TR>';
+                }
+
+                table += '</TABLE>';
+                userlist.innerHTML = table;
+            }
 
             function question() {
                 var question = {
@@ -118,14 +152,22 @@
                 send(question);
             }
 
-            function reset() {
-                send({op: 'reset'});
+            function reset(player_id) {
+                send({op: 'reset'}, player_id);
+            }
+
+            function sendNewCharToPlayer(player_id) {
+                const char_id = Math.floor(Math.random() * characters.length);
+                while (userImageUsed(characters[char_id].img) === true) {
+                    char_id = Math.floor(Math.random() * characters.length);
+                }
+                send({op: 'name', 'char': characters[char_id]}, player_id);
             }
 
             function setname() {
-                var char_id = Math.floor(Math.random() * characters.length);
-                
-                send({op: 'name', 'char': characters[char_id]});
+                for (const player_id in players) {
+                    sendNewCharToPlayer(player_id);
+                }
             }
 
             function send(msg, user_to = -1){

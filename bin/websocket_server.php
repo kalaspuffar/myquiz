@@ -28,15 +28,20 @@ class MyQuizWebSocketServer extends WebSocketServer {
       if (isset($envelop->message->op) && $envelop->message->op == 'join_game') {
         $this->myUsers[$sentBy->id]->game_id = $envelop->game_id;
         $this->myUsers[$sentBy->id]->role = $envelop->message->role;
+        echo 'Joining ' . $sentBy->id . ' as ' . $envelop->message->role . "\n";
       }  
       if ($envelop->role_to == 'gamemaster') {
         $envelop->user_id = $sentBy->id;
       }
 
-      foreach ($this->myUsers as $user) {
-        if ($envelop->game_id == $user->game_id && $envelop->role_to == $user->role) {
-          $this->send($user, json_encode($envelop));
-        }
+      if (isset($envelop->user_to) && $envelop->user_to != -1) {
+        $this->send($this->myUsers[$envelop->user_to], json_encode($envelop));
+      } else {
+        foreach ($this->myUsers as $user) {
+          if ($envelop->game_id == $user->game_id && $envelop->role_to == $user->role) {
+            $this->send($user, json_encode($envelop));
+          }
+        }  
       }
     }
   }
@@ -58,6 +63,31 @@ class MyQuizWebSocketServer extends WebSocketServer {
   }
 
   protected function closed($user) {
+    if (isset($this->myUsers[$user->id]) && $this->myUsers[$user->id]->role == 'player') {
+      $envelop = new stdClass();
+      $envelop->game_id = $this->myUsers[$user->id]->game_id;
+      $envelop->user_id = $user->id;
+      $envelop->message = new stdClass();
+      $envelop->message->op = 'disconnect';
+      
+      foreach ($this->myUsers as $loopUser) {
+        if ($envelop->game_id == $loopUser->game_id && $loopUser->role == "gamemaster") {
+          $this->send($loopUser, json_encode($envelop));
+        }
+      }  
+    }
+    if (isset($this->myUsers[$user->id]) && $this->myUsers[$user->id]->role == 'gamemaster') {
+      $envelop = new stdClass();
+      $envelop->game_id = $this->myUsers[$user->id]->game_id;
+      $envelop->message = new stdClass();
+      $envelop->message->op = 'game_end';
+      
+      foreach ($this->myUsers as $loopUser) {
+        if ($envelop->game_id == $loopUser->game_id && $loopUser->role == "player") {
+          $this->send($loopUser, json_encode($envelop));
+        }
+      }  
+    }
     if (isset($this->myUsers[$user->id])) {
       unset($this->myUsers[$user->id]);
     }

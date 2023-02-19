@@ -94,7 +94,7 @@ abstract class WebSocketServer {
           }
           else {
             $this->connect($client);
-            $this->stdout("Client connected.");
+            //$this->stdout("Client connected.");
           }
         }
         else {
@@ -168,7 +168,7 @@ abstract class WebSocketServer {
       }
 
       if ($triggerClosed) {
-        $this->stdout("Client disconnected.");
+        //$this->stdout("Client disconnected.");
         $this->closed($disconnectedUser);
         socket_close($disconnectedUser->socket);
       }
