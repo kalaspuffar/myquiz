@@ -62,11 +62,14 @@
                 };
                 websocket.onmessage = function(msg) {                     
                     var res = JSON.parse(msg.data);
-
+                    
                     main.style.display = '';
                     name_input.style.display = 'none';
-
-                    if (res.message.op === 'name') {
+                    
+                    if (res.message.op === 'game_end') {                        
+                        gameover(main);
+                        quit();
+                    } else if (res.message.op === 'name') {
                         suggested_char = res.message.char;
                         main.style.display = 'none';
                         name_input.style.display = '';
@@ -80,8 +83,8 @@
                                 res.message.answers[i] + '</button>';
                         }
                         main.innerHTML = data;
-                    } else {
-                        reset();
+                    } else if (res.message.op === 'reset') {
+                        reset(main);
                     }
                 };
                 websocket.onclose = function(msg) {};
@@ -125,8 +128,21 @@
                     console.log(ex);
                 }
             }
+            
+            function quit() {
+                if (socket != null) {
+                    socket.close();
+                    socket = null;
+                }
+            }
 
-            function reset() {
+            function gameover(main) {
+                var data = '';
+                data += '<img id="gameover" src="images/gameover.png" />';
+                main.innerHTML = data;
+            }
+
+            function reset(main) {
                 var data = '';
                 data += '<h2>Please wait</h2>';
                 data += '<img id="waiting" src="images/waiting.svg" />';

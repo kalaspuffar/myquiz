@@ -1,5 +1,6 @@
 html {
     background-color: black;
+    width: 100vw;
 }
 body {
     background: rgb(83,35,150);
@@ -54,6 +55,11 @@ input {
   margin: 3rem auto 0rem;
 }
 
+#gameover {
+  margin-top: 0rem;
+  width: 100%;
+}
+
 @media (min-width: 550px) {
     .hero {
         padding-bottom: 12rem;
@@ -73,15 +79,7 @@ input {
     #waiting {
       margin-top: -7rem;
     }
-
-    #char_img {
-      position: relative;
-      max-height: 400px;
-      max-width: 80%;
-      margin: 3rem auto 0rem;
-    }
 }
-
 
 @media (min-width: 750px) {
     .hero {

@@ -92,6 +92,10 @@
                     } else if (res.message.op === 'answer') {
                         log("Answer: " + JSON.stringify(res));
                         reset();
+                    } else if (res.message.op === 'join_game') {
+                        log("Answer: " + JSON.stringify(res));
+                    } else if (res.message.op === 'disconnect') {
+                        log("Answer: " + JSON.stringify(res));                        
                     } else {
                         log("Received: " + res.message);
                     }
