@@ -29,10 +29,13 @@
                 <div class="row">
                     <div id="log" class="one-half column" style="background-color: white; border-radius:100px; color: black; padding: 10px"></div>
                     <div class="one-half column">
-                        <button onclick="question()">Question</button>
+                        <button onclick="fetchQuestions()">Fetch questions</button>
+                        <button onclick="sendQuestion()">Send question</button>
                         <button onclick="reset()">Reset</button>
                         <button onclick="setname()">Name</button>
                     </div>
+                </div>
+                <div class="row u-full-width" id="questionlist">
                 </div>
             </div>
         </div>
@@ -56,7 +59,7 @@
                 {name: 'Cranky', img: 'krokodile.svg'},
                 {name: 'Shiva', img: 'leopard.svg'},
                 {name: 'Aslan', img: 'lion.svg'},
-                {name: 'King loue', img: 'monkey.svg'},
+                {name: 'King Louie', img: 'monkey.svg'},
                 {name: 'Basil', img: 'mouse.svg'},
                 {name: 'Octy', img: 'octopus.svg'},
                 {name: 'Pumpkin', img: 'panda.svg'},
@@ -72,6 +75,9 @@
             ]
 
             var players = [];
+
+            var questions;
+            var currentQuestion = 0;
 
             var websocket;
             try {
@@ -125,6 +131,25 @@
                 return false;
             }
 
+            function updateQuestionList() {
+                var questionlist = document.getElementById('questionlist');
+                var table = '<TABLE class="u-full-width">';
+
+                table += '<TR><TH>id</TH><TH>question</TH><TH>answers</TH><TH>correct</TH></TR>';
+
+                for (const i in questions) {
+                    table += '<TR>';
+                    table += '<TD>' + questions[i].id + '</TD>';
+                    table += '<TD>' + questions[i].question + '</TD>';
+                    table += '<TD>' + questions[i].answers + '</TD>';
+                    table += '<TD>' + questions[i].correct + '</TD>';
+                    table += '</TR>';
+                }
+
+                table += '</TABLE>';
+                questionlist.innerHTML = table;
+            }
+
             function updateUserList() {
                 var userlist = document.getElementById('userlist');
                 var table = '<TABLE>';
@@ -143,13 +168,27 @@
                 userlist.innerHTML = table;
             }
 
-            function question() {
+            function fetchQuestions() {
+                fetch('fetch.php?num=3')
+                    .then((response) => response.json())
+                    .then((data) => {
+                        currentQuestion = 0;
+                        questions = data;
+                        updateQuestionList();
+                    });
+            }
+
+            function sendQuestion() {
+                if (currentQuestion >= questions.length) {
+                    return;
+                }
                 var question = {
                     op: 'question',
-                    question: 'What country has the highest life expectancy?',
-                    answers: ['Italia', 'Sweden', 'Hong Kong', 'Bolivia']                    
+                    question: questions[currentQuestion].question,
+                    answers: questions[currentQuestion].answers                   
                 };
                 send(question);
+                currentQuestion++;
             }
 
             function reset(player_id) {

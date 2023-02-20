@@ -29,35 +29,5 @@
             </div>
         </div>
     </div>
-
-<?php
-/*
-require_once(__DIR__ . '/../etc/config.php');
-
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
-echo "Hello world2<br>";
-$mysqli = mysqli_connect($DB_HOST, $DB_USERNAME, $DB_PASSWORD, $DB_NAME);
-
-if (!$mysqli) {
-   echo 'Connection failed<br>';
-   echo 'Error number: ' . mysqli_connect_errno() . '<br>';
-   echo 'Error message: ' . mysqli_connect_error() . '<br>';
-   die();
-}
-echo 'Successfully connected!<br>';
-
-$result = $mysqli->query('SELECT CHAR(92);');
-foreach ($result as $row) {
-    var_dump($row);
-}
-
-$mysqli->close();
-echo 'After<br>';
-*/
-?>
-
 </body>
 </html>
