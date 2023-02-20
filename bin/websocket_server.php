@@ -18,6 +18,10 @@ class MyQuizWebSocketServer extends WebSocketServer {
 
     $envelop = json_decode($messageString);
 
+    if ($envelop->timestamp > time() + 3600) {
+      return;
+    }
+
     $hashResult = $envelop->hash;
     unset($envelop->hash);
     $envelop->secret = hash("sha256", $SITE_SECRET . $envelop->timestamp . $envelop->game_id);

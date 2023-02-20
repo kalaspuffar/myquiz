@@ -1,7 +1,7 @@
 <?php
     require_once __DIR__ . "/../etc/config.php";
 
-    $timestamp = mktime();
+    $timestamp = time();
     $game_id = $_GET['game'];
     $secret = hash("sha256", $SITE_SECRET . $timestamp . $game_id);
 ?>
