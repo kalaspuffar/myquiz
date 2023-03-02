@@ -47,6 +47,8 @@ class MyQuizWebSocketServer extends WebSocketServer {
           }
         }  
       }
+    } else {
+      echo "Hash issue\n";
     }
   }
 
@@ -87,7 +89,7 @@ class MyQuizWebSocketServer extends WebSocketServer {
       $envelop->message->op = 'game_end';
       
       foreach ($this->myUsers as $loopUser) {
-        if ($envelop->game_id == $loopUser->game_id && $loopUser->role == "player") {
+        if ($envelop->game_id == $loopUser->game_id && $loopUser->role != "gamemaster") {
           $this->send($loopUser, json_encode($envelop));
         }
       }  

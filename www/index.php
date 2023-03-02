@@ -17,11 +17,23 @@
         <div class="container">
             <div class="row">
                 <div class="one-half column">
-                    <h4 class="hero-heading">
+                    <h2>My quiz application</h2>
+                    <p>
                         Soon there will be a site with playful joy where you can challange your friends and 
-                        collegues to a friendly quiz challange.
-                    </h4>
-                    <button class="button button-disabled" href="#">Get started</button>
+                        collegues to a friendly quiz challange.                        
+                    </p>
+                    <p>
+                        This service is now in closed alpha, if you have been invited to a game, enter your 
+                        <span style="color:yellow">game id</span> below:
+                    </p>
+                    <form action="player.php" method="GET">
+                        <div class="one-half column">
+                            <input type="text" name="game">
+                        </div>
+                        <div class="one-half column">
+                            <button class="button button-disabled" href="#">Get started</button>
+                        </div>
+                    </form>
                 </div>
                 <div class="one-half column">
                     <img class="playful" src="images/playful.jpeg">

@@ -1,12 +1,16 @@
 html {
     background-color: black;
+    box-sizing: border-box;
+    height: 100vh;
     width: 100vw;
 }
 body {
     background: rgb(83,35,150);
     background: radial-gradient(circle, rgba(83,35,150,0.3) 0%, rgba(99,9,121,0.3) 50%, rgba(83,35,150,0.3) 100%);    
     color: white;
-    height: 100vh;
+    height: 100%;
+    width: 100vw;
+    box-sizing: border-box;
 }
 
 .button {
@@ -60,6 +64,93 @@ input {
   width: 100%;
 }
 
+#player_list {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.center {
+  text-align: center;
+}
+
+.player_avatar {
+  max-width: 80px;
+  max-height: 80px;
+}
+
+.player_avatar_list {
+  max-width: 50px;
+  max-height: 50px;
+}
+
+.player_avatar_waiting {
+  max-width: 80px;
+  max-height: 80px;
+}
+
+#answer_chart.column {
+  --color: #EF5350;
+  height: 500px;
+  max-width: 1000px;
+  margin: 0 auto;
+  --heading-size: 15rem;  
+  --labels-size: 10rem;  
+}
+
+#answer_chart.bar {
+  height: 500px;
+  max-width: 1000px;
+  margin: 0 auto;
+  --heading-size: 5rem;  
+  --labels-size: 10rem;  
+}
+
+#answer_chart caption {
+  font-size: 3rem;
+}
+
+#answer_chart td {
+  font-size: 4rem;
+}
+
+#answer_chart.column th {
+  font-size: 2rem;
+  padding: 10px;
+}
+
+#answer_chart.bar th {
+  font-size: 1.5rem;
+  padding: 10px;
+}
+
+#answer_chart.column tbody td {
+  transform-origin: bottom;
+  animation: revealing-rows 4s linear;
+}
+@keyframes revealing-rows {
+  0%  { transform: scaleY( 0 ); }
+  15% { transform: scaleY( 1 ); }
+}
+#answer_chart.bar tbody td {
+  transform-origin: left;
+  animation: revealing-bars 4s linear;
+}
+@keyframes revealing-bars {
+  0%  { transform: scaleX( 0 ); }
+  15% { transform: scaleX( 1 ); }
+}
+
+#answer_chart.column td {
+  border-radius: 15px 15px 0 0;
+  border: 1px solid var(--color);
+  margin: 10px;
+}
+
+#waiting_room {
+  margin-top: -12rem;
+}
+
 @media (min-width: 550px) {
     .hero {
         padding-bottom: 12rem;
@@ -79,6 +170,11 @@ input {
     #waiting {
       margin-top: -7rem;
     }
+
+    .player_avatar {
+      max-width: 120px;
+      max-height: 120px;
+    }    
 }
 
 @media (min-width: 750px) {
@@ -115,6 +211,10 @@ input {
       max-width: 200px;
       z-index: 3;
     }
+    .player_avatar {
+      max-width: 140px;
+      max-height: 140px;
+    }    
 }
 
 @media (min-width: 1000px) {
@@ -143,4 +243,8 @@ input {
       max-width: 400px;
       z-index: 3;
     }
+    .player_avatar {
+      max-width: 200px;
+      max-height: 200px;
+    }    
 }

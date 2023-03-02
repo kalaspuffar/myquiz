@@ -62,8 +62,9 @@
                 };
                 websocket.onmessage = function(msg) {                     
                     var res = JSON.parse(msg.data);
-                    
+                            
                     main.style.display = '';
+                    main.className = 'container';
                     name_input.style.display = 'none';
 
                     if (res.message.op === 'game_end') {                        
@@ -82,6 +83,17 @@
                             data += '<button class="button button-answer button-primary" onclick="answer(' + i + ')">' + 
                                 res.message.answers[i] + '</button>';
                         }
+                        main.innerHTML = data;
+                    } else if (res.message.op === 'show_score') {
+                        main.className = 'container center';
+                        var data = '';
+                        data += '<h2>' + res.message.score.name + '</h2>';
+                        data += '<img class="player_avatar" src="images/chars/' + res.message.score.img + '"/>';
+                        var score_post = "th";
+                        score_post = res.message.score.placement == 1 ? 'st' : score_post;
+                        score_post = res.message.score.placement == 2 ? 'nd' : score_post;
+                        var score_text = res.message.score.placement + score_post;
+                        data += '<h3>You are currently placed ' + score_text + ' with ' + res.message.score.score + ' points</h3>';
                         main.innerHTML = data;
                     } else if (res.message.op === 'reset') {
                         reset(main);
@@ -111,6 +123,14 @@
                 send(msg);
             }
 
+            function escapeUnicode(str) {
+                return [...str].map(c => /^[\x00-\x7F]$/.test(c) ? c : c.split("").map(a => "\\u" + a.charCodeAt().toString(16).padStart(4, "0")).join("")).join("");
+            }
+            function stringify(str) {
+                return escapeUnicode(JSON.stringify(str));
+            }
+
+
             function send(msg) {
                 try { 
                     var msgenvelop = {
@@ -120,10 +140,10 @@
                         message: msg,
                         secret: '<?= $secret ?>',
                     };
-                    msgenvelop.hash = sha256(JSON.stringify(msgenvelop));
+                    msgenvelop.hash = sha256(stringify(msgenvelop));
                     delete msgenvelop.secret;
 
-                    websocket.send(JSON.stringify(msgenvelop)); 
+                    websocket.send(stringify(msgenvelop)); 
                 } catch(ex) { 
                     console.log(ex);
                 }

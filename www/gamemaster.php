@@ -22,17 +22,20 @@
         <link rel="stylesheet" href="css/custom.css">   
     </head>
     <body>
-        <div class="section hero">
+        <div class="section">
             <div class="container">
                 <div class="row" id="userlist">
                 </div>
                 <div class="row">
                     <div id="log" class="one-half column" style="background-color: white; border-radius:100px; color: black; padding: 10px"></div>
                     <div class="one-half column">
-                        <button onclick="fetchQuestions()">Fetch questions</button>
-                        <button onclick="sendQuestion()">Send question</button>
-                        <button onclick="reset()">Reset</button>
-                        <button onclick="setname()">Name</button>
+                        <input id="number_of_questions" type="text" value="3"/>
+                        <button class="button" onclick="fetchQuestions()">Fetch questions</button>
+                        <button class="button" onclick="sendQuestion()">Send question</button>
+                        <button class="button" onclick="reset()">Reset</button>
+                        <button class="button" onclick="setname()">Name</button>
+                        <button class="button" onclick="showAnswer()">Show answer</button>
+                        <button class="button" onclick="showScoreBoard()">Show scoreboard</button>
                     </div>
                 </div>
                 <div class="row u-full-width" id="questionlist">
@@ -76,8 +79,13 @@
 
             var players = [];
 
+            var answers = [];
+
             var questions;
             var currentQuestion = 0;
+            var nextQuestion = 0;
+
+            var lastQuestionTime = -1;
 
             var websocket;
             try {
@@ -91,28 +99,63 @@
                         role: 'gamemaster',
                     };
                     send(msg);
-                    //log('Sent: ' + JSON.stringify(msgenvelop));
                 };
                 websocket.onmessage = function(msg) {                     
                     var res = JSON.parse(msg.data);
+
                     if (res.message.op === 'name') {
                         players[res.user_id].name = res.message.answer.name;
                         players[res.user_id].img = res.message.answer.img;
+                        players[res.user_id].score = 0;
+                        players[res.user_id].last_question = -1;                        
                         reset(res.user_id);
+                        userJoined(res.message.answer.img);
                         updateUserList();
                     } else if (res.message.op === 'answer') {
-                        log("Answer: " + JSON.stringify(res));
+                        if (!answers[currentQuestion]) {
+                            answers[currentQuestion] = [];
+                        }
+
+                        var answerTime = new Date().getTime() - lastQuestionTime;
+
+                        answers[currentQuestion].push({
+                            answer: res.message.answer,
+                            time: answerTime
+                        });
+
+                        var answerVal = questions[currentQuestion].answers[res.message.answer];
+                        var correctVal = questions[currentQuestion].correct;
+                        if (answerVal == correctVal) {
+                            players[res.user_id].score += 1000 + (Math.max(5000 - answerTime, 0));
+                        }
+                        players[res.user_id].last_question = currentQuestion;                        
+                        updateUserList();
+
+                        var has_answered = 0;
+                        var all_players = 0;
+                        for (var i in players) {
+                            has_answered += (players[i].last_question == currentQuestion) ? 1 : 0;
+                            all_players++;
+                        }
+                        if (has_answered == all_players) {
+                            showAnswer();
+                        }
                         reset(res.user_id);
-                    } else if (res.message.op === 'join_game') {
+                    } else if (res.message.op === 'join_game' && res.message.role == 'viewer') {
+                        send({op: 'start'}, 'viewer');
+                    } else if (res.message.op === 'join_game' && res.message.role == 'player') {
                         players[res.user_id] = {
-                            user_id: res.user_id
+                            user_id: res.user_id,
+                            name: '',
+                            score: 0
                         };
+
                         updateUserList();
                         sendNewCharToPlayer(res.user_id);
                     } else if (res.message.op === 'disconnect') {
                         delete players[res.user_id];
                     } else {
-                        log("Received: " + res.message);
+                        //log("Received: " + res.message);
                     }
                 };
                 websocket.onclose   = function(msg) { 
@@ -154,13 +197,15 @@
                 var userlist = document.getElementById('userlist');
                 var table = '<TABLE>';
 
-                table += '<TR><TH>id</TH><TH>name</TH><TH>img</TH></TR>';
+                table += '<TR><TH>Char</TH><TH>Name</TH><TH>Score</TH><TH>Answered</TH></TR>';
 
                 for (const i in players) {
+                    var answered_last = players[i].last_question == currentQuestion;
                     table += '<TR>';
-                    table += '<TD>' + players[i].user_id + '</TD>';
+                    table += '<TD>' + (players[i].img ? '<img class="player_avatar" src="images/chars/' + players[i].img + '"/>' : '') + '</TD>';
                     table += '<TD>' + players[i].name + '</TD>';
-                    table += '<TD>' + players[i].img + '</TD>';
+                    table += '<TD>' + players[i].score + '</TD>';
+                    table += '<TD>' + (answered_last ? '<img class="player_avatar" src="images/checkmark.svg"/>' : '') + '</TD>';
                     table += '</TR>';
                 }
 
@@ -169,30 +214,94 @@
             }
 
             function fetchQuestions() {
-                fetch('fetch.php?num=3')
+                var num_element = document.getElementById('number_of_questions');
+                fetch('fetch.php?num=' + num_element.value)
                     .then((response) => response.json())
                     .then((data) => {
-                        currentQuestion = 0;
+                        nextQuestion = 0;
                         questions = data;
                         updateQuestionList();
                     });
             }
 
             function sendQuestion() {
-                if (currentQuestion >= questions.length) {
+                if (nextQuestion >= questions.length) {
                     return;
                 }
                 var question = {
                     op: 'question',
-                    question: questions[currentQuestion].question,
-                    answers: questions[currentQuestion].answers                   
+                    question: questions[nextQuestion].question,
+                    answers: questions[nextQuestion].answers
                 };
                 send(question);
-                currentQuestion++;
+                send(question, 'viewer');
+                lastQuestionTime = new Date().getTime();
+                currentQuestion = nextQuestion;
+                nextQuestion++;
+                updateUserList();
             }
 
+            function showAnswer() {
+                var answered = [];
+                for (var i in questions[currentQuestion].answers) {
+                    answered[i] = 0;
+                }
+                for (var i in answers[currentQuestion]) {
+                    answered[answers[currentQuestion][i].answer]++;
+                }
+
+                var msg = {
+                    op: 'show_result',
+                    question: questions[currentQuestion],
+                    answered: answered
+                };
+                send(msg, 'viewer');
+            }
+
+            function showScoreBoard() {
+                var scoreboard = [];                
+                for (var i in players) {
+                    scoreboard.push({
+                        id: players[i].user_id,
+                        name: players[i].name,
+                        img: players[i].img,
+                        score: players[i].score
+                    });
+                }
+
+                scoreboard.sort(function (a, b) {
+                    if (a.score > b.score) {
+                        return -1;
+                    }
+                    if (a.score < b.score) {
+                        return 1;
+                    }
+                    return 0;
+                });
+
+                var place = 1;
+                for (var i in scoreboard) {
+                    scoreboard[i].placement = place++;
+                    send({op: 'show_score', 'score': scoreboard[i]}, 'player', scoreboard[i].id);
+                }
+                var msg = {
+                    op: 'show_scoreboard',
+                    scoreboard: scoreboard.slice(0, 5),
+                };
+                send(msg, 'viewer');
+            }
+
+
             function reset(player_id) {
-                send({op: 'reset'}, player_id);
+                send({op: 'reset'}, 'player', player_id);                
+            }
+
+            function userJoined(img) {
+                var question = {
+                    op: 'played',
+                    img: img                
+                };
+                send(question, 'viewer');
             }
 
             function sendNewCharToPlayer(player_id) {
@@ -200,7 +309,7 @@
                 while (userImageUsed(characters[char_id].img) === true) {
                     char_id = Math.floor(Math.random() * characters.length);
                 }
-                send({op: 'name', 'char': characters[char_id]}, player_id);
+                send({op: 'name', 'char': characters[char_id]}, 'player', player_id);
             }
 
             function setname() {
@@ -209,7 +318,14 @@
                 }
             }
 
-            function send(msg, user_to = -1){
+            function escapeUnicode(str) {
+                return [...str].map(c => /^[\x00-\x7F]$/.test(c) ? c : c.split("").map(a => "\\u" + a.charCodeAt().toString(16).padStart(4, "0")).join("")).join("");
+            }
+            function stringify(str) {
+                return escapeUnicode(JSON.stringify(str));
+            }
+
+            function send(msg, role = 'player', user_to = -1){
                 if(!msg) { 
                     alert("Message can not be empty"); 
                     return;
@@ -218,21 +334,21 @@
                     var msgenvelop = {
                         timestamp: <?= $timestamp ?>,
                         game_id: <?= $game_id ?>,
-                        role_to: 'player',
+                        role_to: role,
                         user_to: user_to,
                         message: msg,
                         secret: '<?= $secret ?>',
                     };
-                    msgenvelop.hash = sha256(JSON.stringify(msgenvelop));
+
+                    msgenvelop.hash = sha256(stringify(msgenvelop));
                     delete msgenvelop.secret;
 
-                    websocket.send(JSON.stringify(msgenvelop)); 
-                    //log('Sent: ' + JSON.stringify(msgenvelop)); 
+                    websocket.send(stringify(msgenvelop)); 
                 } catch(ex) { 
                     log(ex); 
                 }
             }
-            function quit(){
+            function quit() {
                 if (websocket != null) {
                     log("Goodbye!");
                     websocket.close();

@@ -25,7 +25,7 @@
 
 <?php if ($_COOKIE["pass"] != $QUESTION_LOCK) { ?>
     <form action="#" method="POST">
-        <input name="pass">
+        <input name="pass" type="password">
     </form>
 <?php } else { ?>
     <?php
