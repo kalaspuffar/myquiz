@@ -58,6 +58,8 @@
 
             var suggested_char = false;
 
+            var game_has_started = false;
+
             var websocket;
             try {
                 websocket = new WebSocket("wss://myquiz.app/websocket");
@@ -80,6 +82,7 @@
                         gameover(main);
                         quit();
                     } else if (res.message.op === 'userlist') {
+                        if (game_has_started) return;
                         waiting_room.style.display = '';
                         main.style.display = 'none';
                         answer_result.style.display = 'none';
@@ -90,6 +93,7 @@
                         }
                         player_list.innerHTML = playerList;
                     } else if (res.message.op === 'question') {
+                        game_has_started = true;
                         var data = '';
                         data += '<h2>' + res.message.question + '</h2>';
                         for (var i = 0; i < res.message.answers.length; i++) {
@@ -98,9 +102,11 @@
                         }
                         main.innerHTML = data;
                     } else if (res.message.op === 'reset') {
+                        game_has_started = false;
                         player_list.innerHTML = '';
                         reset(main);
                     } else if (res.message.op === 'start') {
+                        if (game_has_started) return;
                         player_list.innerHTML = '';
                         waiting_room.style.display = '';
                         main.style.display = 'none';
@@ -121,25 +127,6 @@
                 websocket.onclose = function(msg) {};
             } catch(ex){ 
                 console.log(ex);
-            }
-
-            function setname() {
-                if (char_name.value !== '') {
-                    suggested_char.name = char_name.value
-                }
-                var msg = {
-                    op: 'name',
-                    answer: suggested_char,
-                };
-                send(msg);
-            }
-
-            function answer(answer) {
-                var msg = {
-                    op: 'answer',
-                    answer: answer,
-                };
-                send(msg);
             }
 
             function showResults(msg) {

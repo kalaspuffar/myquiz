@@ -3,6 +3,7 @@
 
     $timestamp = time();
     $game_id = $_GET['game'];
+    $unique_player_id = hash("sha256", random_bytes(2000));
     $secret = hash("sha256", $SITE_SECRET . $timestamp . $game_id);
 ?>
 <!DOCTYPE html>
@@ -52,11 +53,18 @@
             var websocket;
             try {
                 websocket = new WebSocket("wss://myquiz.app/websocket");
-                websocket.onopen = function(msg) { 
+                websocket.onopen = function(msg) {
+                    var uniqid = window.localStorage.getItem('myquiz_unique');
+                    if (!uniqid) {
+                        uniqid = '<?= $unique_player_id ?>';
+                        window.localStorage.setItem('myquiz_unique', uniqid);
+                    }
+
                     var msg = {
                         op: 'join_game',
                         role: 'player',
                         role_to: 'gamemaster',
+                        unique: uniqid
                     };
                     send(msg);
                 };
@@ -82,6 +90,15 @@
                         for (var i = 0; i < res.message.answers.length; i++) {
                             data += '<button class="button button-answer button-primary" onclick="answer(' + i + ')">' + 
                                 res.message.answers[i] + '</button>';
+                        }
+                        main.innerHTML = data;                    
+                    } else if (res.message.op === 'show_result') {
+                        var data = '';
+                        var question = res.message.question;
+                        data += '<h2>' + question.question + '</h2>';
+                        for (var i = 0; i < question.answers.length; i++) {
+                            var select_class = question.correct == question.answers[i] ? 'green' : '';
+                            data += '<button class="button button-answer ' + select_class + '">' + question.answers[i] + '</button>';
                         }
                         main.innerHTML = data;
                     } else if (res.message.op === 'show_score') {

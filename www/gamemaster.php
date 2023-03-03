@@ -25,6 +25,8 @@
         <div class="section gamemaster">
             <div class="container">
                 <h1>Game master interface</h1>
+                <p>Session ends in <span id="time">60:00</span>.</p>
+
                 <div class="row">
                     <div class="one-half column">
                         Number of questions:
@@ -39,11 +41,16 @@
                     <button class="button green" onclick="showAnswer()">Show answer</button>
                     <button class="button green" onclick="showScoreBoard()">Show scoreboard</button>
                     <a class="button green" target="__blank" href="viewer.php?game=<?= $game_id ?>">Open big view</a>
-                    <button class="button red" onclick="reset()">Reset</button>
+                    <button class="button red" onclick="resetAll()">Reset</button>
                 </div>
-                <div class="row" id="userlist">
-                </div>
+                <h3>Questions</h3>
                 <div class="row u-full-width" id="questionlist">
+                </div>
+                <h3>Logged In Users</h3>
+                <div class="row u-full-width" id="userlist">
+                </div>
+                <h3>Logged Out Users</h3>
+                <div class="row u-full-width" id="userlist_logged_out">
                 </div>
             </div>
         </div>
@@ -83,11 +90,13 @@
             ]
 
             var players = [];
+            var logged_out = [];
 
             var answers = [];
 
             var questions;
-            var currentQuestion = 0;
+            var seenQuestions = [];
+            var currentQuestion = -1;
             var nextQuestion = 0;
 
             var lastQuestionTime = -1;
@@ -108,8 +117,6 @@
                     if (res.message.op === 'name') {
                         players[res.user_id].name = res.message.answer.name;
                         players[res.user_id].img = res.message.answer.img;
-                        players[res.user_id].score = 0;
-                        players[res.user_id].last_question = -1;                        
                         reset(res.user_id);
 
                         userJoined();
@@ -142,20 +149,29 @@
                         }
                         if (has_answered == all_players) {
                             showAnswer();
+                        } else {
+                            reset(res.user_id);
                         }
-                        reset(res.user_id);
                     } else if (res.message.op === 'join_game' && res.message.role == 'viewer') {
                         send({op: 'start'}, 'viewer');
                     } else if (res.message.op === 'join_game' && res.message.role == 'player') {
-                        players[res.user_id] = {
-                            user_id: res.user_id,
-                            name: '',
-                            score: 0
-                        };
-
+                        if (logged_out[res.message.unique]) {
+                            var new_player = logged_out[res.message.unique];                            
+                            delete logged_out[res.message.unique];
+                            players[res.user_id] = new_player;
+                        } else {
+                            players[res.user_id] = {
+                                user_id: res.user_id,
+                                unique: res.message.unique,
+                                name: '',
+                                score: 0,
+                                last_question: -1
+                            };
+                        }
                         updateUserList();
                         sendNewCharToPlayer(res.user_id);
                     } else if (res.message.op === 'disconnect') {
+                        logged_out[players[res.user_id].unique] = players[res.user_id];
                         delete players[res.user_id];
                         userJoined()
                         updateUserList();
@@ -179,10 +195,10 @@
                 var questionlist = document.getElementById('questionlist');
                 var table = '<TABLE class="u-full-width">';
 
-                table += '<TR><TH>question</TH><TH>answers</TH><TH>correct</TH></TR>';
+                table += '<TR><TH>Question</TH><TH>Choices</TH><TH>Answer</TH></TR>';
 
                 for (const i in questions) {
-                    if (nextQuestion == i) {
+                    if (currentQuestion == i) {
                         table += '<TR class="green">';
                     } else {
                         table += '<TR>';
@@ -215,13 +231,33 @@
 
                 table += '</TABLE>';
                 userlist.innerHTML = table;
+
+                var userlist = document.getElementById('userlist_logged_out');               
+
+                var table = '<TABLE>';
+
+                table += '<TR><TH>Char</TH><TH>Name</TH><TH>Score</TH><TH>Answered</TH></TR>';
+
+                for (const i in logged_out) {
+                    var answered_last = logged_out[i].last_question == currentQuestion;
+                    table += '<TR>';
+                    table += '<TD>' + (logged_out[i].img ? '<img class="player_avatar_list" src="images/chars/' + logged_out[i].img + '"/>' : '') + '</TD>';
+                    table += '<TD>' + logged_out[i].name + '</TD>';
+                    table += '<TD>' + logged_out[i].score + '</TD>';
+                    table += '<TD>' + (answered_last ? '<img class="player_avatar_list" src="images/checkmark.svg"/>' : '') + '</TD>';
+                    table += '</TR>';
+                }
+
+                table += '</TABLE>';
+                userlist.innerHTML = table;
             }
 
             function fetchQuestions() {
                 var num_element = document.getElementById('number_of_questions');
-                fetch('fetch.php?num=' + num_element.value)
+                fetch('fetch.php?num=' + num_element.value + '&seen=' + seenQuestions.join(','))
                     .then((response) => response.json())
                     .then((data) => {
+                        currentQuestion = -1;
                         nextQuestion = 0;
                         questions = data;
                         updateQuestionList();
@@ -239,6 +275,7 @@
                 };
                 send(question);
                 send(question, 'viewer');
+                seenQuestions.push(questions[nextQuestion].id);
                 lastQuestionTime = new Date().getTime();
                 currentQuestion = nextQuestion;
                 nextQuestion++;
@@ -258,8 +295,9 @@
                 var msg = {
                     op: 'show_result',
                     question: questions[currentQuestion],
-                    answered: answered
                 };
+                send(msg);
+                msg.answered = answered;
                 send(msg, 'viewer');
             }
 
@@ -296,6 +334,11 @@
                 send(msg, 'viewer');
             }
 
+            function resetAll() {
+                send({op: 'reset'});
+                send({op: 'reset'}, 'viewer');
+            }
+
             function reset(player_id) {
                 send({op: 'reset'}, 'player', player_id);                
             }
@@ -314,7 +357,7 @@
             }
 
             function sendNewCharToPlayer(player_id) {
-                const char_id = Math.floor(Math.random() * characters.length);
+                var char_id = Math.floor(Math.random() * characters.length);
                 while (userImageUsed(characters[char_id].img) === true) {
                     char_id = Math.floor(Math.random() * characters.length);
                 }
@@ -357,6 +400,29 @@
                     console.log(ex); 
                 }
             }
+       
+            function startTimer(duration, display) {
+                var timer = duration, minutes, seconds;
+                setInterval(function () {
+                    minutes = parseInt(timer / 60, 10);
+                    seconds = parseInt(timer % 60, 10);
+
+                    minutes = minutes < 10 ? "0" + minutes : minutes;
+                    seconds = seconds < 10 ? "0" + seconds : seconds;
+
+                    display.textContent = minutes + ":" + seconds;
+
+                    if (--timer < 0) {
+                        timer = duration;
+                    }
+                }, 1000);
+            }
+
+            window.onload = function () {
+                var sixtyMinutes = 60 * 60, display = document.querySelector('#time');
+                startTimer(sixtyMinutes, display);
+            };
+
             function quit() {
                 if (websocket != null) {
                     websocket.close();
