@@ -79,11 +79,16 @@
                     if (res.message.op === 'game_end') {                        
                         gameover(main);
                         quit();
-                    } else if (res.message.op === 'played') {
+                    } else if (res.message.op === 'userlist') {
                         waiting_room.style.display = '';
                         main.style.display = 'none';
                         answer_result.style.display = 'none';
-                        waiting_room.innerHTML += '<img class="player_avatar_waiting" src="images/chars/' + res.message.img + '">';                        
+
+                        var playerList = '';
+                        for (var i in res.message.users) {
+                            playerList += '<img class="player_avatar_waiting" src="images/chars/' + res.message.users[i] + '">';                        
+                        }
+                        player_list.innerHTML = playerList;
                     } else if (res.message.op === 'question') {
                         var data = '';
                         data += '<h2>' + res.message.question + '</h2>';
@@ -169,7 +174,7 @@
                 }
 
                 data = '';
-                data += '<caption>Leader board</caption>';
+                //data += '<caption>Leader board</caption>';
                 data += '<tbody>';
                 
                 for (var i in msg.scoreboard) {                    
