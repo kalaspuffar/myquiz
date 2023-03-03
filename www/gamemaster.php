@@ -159,7 +159,6 @@
                         delete players[res.user_id];
                         userJoined()
                         updateUserList();
-                    } else {
                     }
                 };
                 websocket.onclose = function(msg) {};
