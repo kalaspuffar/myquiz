@@ -42,11 +42,11 @@
                     <button class="button green" onclick="sendQuestion()">Send question</button>
                     <button class="button green" onclick="showAnswer()">Show answer</button>
                     <button class="button green" onclick="showScoreBoard()">Show scoreboard</button>
-                    <a class="button green" target="__blank" href="viewer.php?game=<?= $game_id ?>&session=<?= $session_id ?>">
+                    <a class="button green" target="_blank" href="viewer.php?game=<?= $game_id ?>&session=<?= $session_id ?>">
                         Open big view
                     </a>
                     <button class="button red" onclick="resetAll()">Reset</button>
-                    <a class="button red" target="__blank" href="newgame.php">New game</a>
+                    <a class="button red" href="newgame.php">New game</a>
                 </div>
                 <h3>Questions</h3>
                 <div class="row u-full-width" id="questionlist">

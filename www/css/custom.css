@@ -31,6 +31,9 @@ body {
   text-align: center;
 }
 
+.newgame_spot {
+  padding-top: 32rem;
+}
 
 .section {
     padding: 8rem 0 7rem;
@@ -193,9 +196,6 @@ input {
 }
 
 @media (min-width: 750px) {
-    .hero {
-      height: 190px;
-    }
     .hero-heading {
       font-size: 2.6rem;
     }

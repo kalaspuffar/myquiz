@@ -17,23 +17,31 @@
         <div class="container">
             <div class="row">
                 <div class="one-half column">
-                    <h2>My quiz application</h2>
-                    <p>
-                        Soon there will be a site with playful joy where you can challange your friends and 
-                        collegues to a friendly quiz challange.                        
-                    </p>
-                    <p>
-                        This service is now in closed alpha, if you have been invited to a game, enter your 
-                        <span style="color:yellow">game id</span> below:
-                    </p>
-                    <form action="player.php" method="GET">
-                        <div class="one-half column">
-                            <input type="text" name="game">
-                        </div>
-                        <div class="one-half column">
-                            <button class="button button-disabled" href="#">Get started</button>
-                        </div>
-                    </form>
+                    <div class="u-full-width column">
+                        <h2>My quiz application</h2>
+                        <p>
+                            I hope this place will be a site with playful joy where you can challange your friends and 
+                            collegues to a friendly quiz challange.                        
+                        </p>
+                        <p>
+                            This service is now in beta, if you have been invited to a game, enter your 
+                            <span style="color:yellow">game id</span> below:
+                        </p>
+                        <form action="player.php" method="GET">
+                            <div class="one-half column">
+                                <input type="text" name="game">
+                            </div>
+                            <div class="one-half column">
+                                <button class="button button-primary">Get started</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="u-full-width newgame_spot">
+                        <p>
+                            What to start a new game challanging your friends and collegues to a quiz match?
+                        </p>
+                        <a class="button" href="newgame.php">Create new game</a>
+                    </div>
                 </div>
                 <div class="one-half column">
                     <img class="playful" src="images/playful.jpeg">
