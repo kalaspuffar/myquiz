@@ -1,0 +1,7 @@
+User-agent: *
+Disallow: /questions.php
+Disallow: /gamemaster.php
+Disallow: /fetch.php
+Disallow: /player.php
+Disallow: /newgame.php
+Disallow: /viewer.php

@@ -70,7 +70,7 @@
         </div>
         <div class="container">
             <table class="u-full-width">
-                <tr><th>id</th><th>question</th><th>answers</th><th>correct</th></tr>
+                <tr><th>ID</th><th>Question</th><th>Options</th><th>Answer</th></tr>
             <?php
                 $result = $mysqli->query('SELECT * FROM questions order by id desc;');
                 foreach ($result as $row) {

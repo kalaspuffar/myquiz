@@ -4,13 +4,15 @@
     $timestamp = time();
     $game_id = $_GET['game'];
     $secret = hash("sha256", $SITE_SECRET . $timestamp . $game_id);
+    
+    require_once __DIR__ . "/../include/gameover.php";
 ?>
 <!DOCTYPE html>
     <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>MyQuiz - Client</title>
-        <meta name="description" content="Small site to play quick quizes. This is the client you play with.">
+        <title>MyQuiz - Game Master Interface</title>
+        <meta name="description" content="Small site to play quick quizes. This is the game master interface used to facilitate a game.">
         <meta name="author" content="Daniel Persson">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -25,7 +27,7 @@
         <div class="section gamemaster">
             <div class="container">
                 <h1>Game master interface</h1>
-                <p>Session ends in <span id="time">60:00</span>.</p>
+                <p>Session ends in <span id="time">00:00</span>.</p>
 
                 <div class="row">
                     <div class="one-half column">
@@ -40,8 +42,11 @@
                     <button class="button green" onclick="sendQuestion()">Send question</button>
                     <button class="button green" onclick="showAnswer()">Show answer</button>
                     <button class="button green" onclick="showScoreBoard()">Show scoreboard</button>
-                    <a class="button green" target="__blank" href="viewer.php?game=<?= $game_id ?>">Open big view</a>
+                    <a class="button green" target="__blank" href="viewer.php?game=<?= $game_id ?>&session=<?= $session_id ?>">
+                        Open big view
+                    </a>
                     <button class="button red" onclick="resetAll()">Reset</button>
+                    <a class="button red" target="__blank" href="newgame.php">New game</a>
                 </div>
                 <h3>Questions</h3>
                 <div class="row u-full-width" id="questionlist">
@@ -400,27 +405,33 @@
                     console.log(ex); 
                 }
             }
-       
-            function startTimer(duration, display) {
+
+            function displayTime(duration, display) {
                 var timer = duration, minutes, seconds;
-                setInterval(function () {
-                    minutes = parseInt(timer / 60, 10);
-                    seconds = parseInt(timer % 60, 10);
+                minutes = parseInt(timer / 60, 10);
+                seconds = parseInt(timer % 60, 10);
 
-                    minutes = minutes < 10 ? "0" + minutes : minutes;
-                    seconds = seconds < 10 ? "0" + seconds : seconds;
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                seconds = seconds < 10 ? "0" + seconds : seconds;
 
-                    display.textContent = minutes + ":" + seconds;
+                display.textContent = minutes + ":" + seconds;
 
-                    if (--timer < 0) {
-                        timer = duration;
-                    }
+                if (--timer < 0) {
+                    timer = duration;
+                }
+                return timer;                       
+            }
+
+            function startTimer(duration, display) {
+                setInterval(function() {
+                    duration = displayTime(duration, display);
                 }, 1000);
             }
 
             window.onload = function () {
-                var sixtyMinutes = 60 * 60, display = document.querySelector('#time');
-                startTimer(sixtyMinutes, display);
+                var timeleft = <?= $timeleft ?>, display = document.querySelector('#time');
+                displayTime(timeleft, display)
+                startTimer(timeleft - 1, display);
             };
 
             function quit() {

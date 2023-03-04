@@ -4,13 +4,15 @@
     $timestamp = time();
     $game_id = $_GET['game'];
     $secret = hash("sha256", $SITE_SECRET . $timestamp . $game_id);
+
+    require_once __DIR__ . "/../include/gameover.php";
 ?>
 <!DOCTYPE html>
     <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>MyQuiz - Client</title>
-        <meta name="description" content="Small site to play quick quizes. This is the client you play with.">
+        <title>MyQuiz - Viewer</title>
+        <meta name="description" content="Small site to play quick quizes. This is the bigscreen viewer used for conference calls.">
         <meta name="author" content="Daniel Persson">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
