@@ -1,5 +1,5 @@
 <?php
-require_once(__DIR__ . '/../etc/config.php');
+require_once(__DIR__ . '/head.php');
 
 $mysqli = mysqli_connect($DB_HOST, $DB_USERNAME, $DB_PASSWORD, $DB_NAME);
 if (!$mysqli) {    
@@ -42,9 +42,9 @@ if (!$result) {
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="stylesheet" href="css/normalize.css">
-    <link rel="stylesheet" href="css/skeleton.css">
-    <link rel="stylesheet" href="css/custom.css">   
+    <link rel="stylesheet" href="../css/normalize.css">
+    <link rel="stylesheet" href="../css/skeleton.css">
+    <link rel="stylesheet" href="../css/custom.css">   
 </head>
 <body>
     <div class="section hero">
@@ -62,14 +62,14 @@ if (!$result) {
                     <p>
                         Have fun playing!
                     </p>
-                    <form action="gamemaster.php" method="GET">
+                    <form action="/gamemaster.php" method="GET">
                         <input type="hidden" name="game" value="<?= $game_id ?>"/>
                         <input type="hidden" name="session" value="<?= $unique_session_id ?>"/>
                         <button class="button button-disabled" href="#">Get started</button>
                     </form>
                 </div>
                 <div class="one-half column">
-                    <img class="playful" src="images/playful.jpeg">
+                    <img class="playful" src="../images/playful.jpeg">
                 </div>
             </div>
         </div>

@@ -40,7 +40,7 @@
                         <p>
                             What to start a new game challanging your friends and collegues to a quiz match?
                         </p>
-                        <a class="button" href="newgame.php">Create new game</a>
+                        <a class="button" href="backend/login.php">Login to create a new game</a>
                     </div>
                 </div>
                 <div class="one-half column">

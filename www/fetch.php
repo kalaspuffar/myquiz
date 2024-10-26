@@ -26,7 +26,7 @@ if (!$mysqli) {
 }
 
 $result = $mysqli->query(
-    "SELECT * FROM questions WHERE id NOT IN (" . implode(',', $seenQuestions) . ") ORDER BY RAND() LIMIT " . $_GET['num']
+    "SELECT * FROM questions WHERE id NOT IN (" . implode(',', $seenQuestions) . ") AND approved = 1 ORDER BY RAND() LIMIT " . $_GET['num']
 );
 $questions = array();
 foreach ($result as $row) {    

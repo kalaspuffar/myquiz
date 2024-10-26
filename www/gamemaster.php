@@ -46,7 +46,8 @@
                         Open big view
                     </a>
                     <button class="button red" onclick="resetAll()">Reset</button>
-                    <a class="button red" href="newgame.php">New game</a>
+                    <a class="button red" href="backend/newgame.php">New game</a>
+                    <a class="button red" href="backend/overview.php">End game</a>
                 </div>
                 <h3>Questions</h3>
                 <div class="row u-full-width" id="questionlist">

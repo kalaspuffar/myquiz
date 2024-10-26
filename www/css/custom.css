@@ -6,9 +6,17 @@ html {
 }
 body {
     background: rgb(83,35,150);
-    background: radial-gradient(circle, rgba(83,35,150,0.3) 0%, rgba(99,9,121,0.3) 50%, rgba(83,35,150,0.3) 100%);    
+    background: radial-gradient(circle, rgba(83,35,150,0.3) 0%, rgba(99,9,121,0.3) 50%, rgba(83,35,150,0.3) 100%);
     color: white;
-    height: 100%;
+    height: 100vh;
+    width: 100vw;
+    box-sizing: border-box;
+}
+
+body.admin {
+    background: rgb(0,0,0);
+    color: white;
+    height: 100vh;
     width: 100vw;
     box-sizing: border-box;
 }
@@ -25,10 +33,13 @@ body {
 .button {
     border-radius: 100px;
 }
-
 .gamemaster.section {
   padding: 2rem 0 7rem;
   text-align: center;
+}
+
+.button-row {
+  padding-top: 2rem;
 }
 
 .newgame_spot {
@@ -62,6 +73,8 @@ input[type="button"].button-answer {
   height: auto;
 }
 
+select,
+textarea,
 input {
   color: black;
 }
